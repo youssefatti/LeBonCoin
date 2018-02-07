@@ -23,13 +23,6 @@
 
 /* Formulaire */
 
-.votreAnnonce{
-    margin-top: 150px;
-    margin-bottom: 20px;
-    background-color:white;
-    border: 1px solid #CCCCCC;
-}
-
 .sousForm{
     background-color: white;
     padding: 10px 15px;
@@ -43,21 +36,21 @@
     color: white;
 }
 
-.vosInformation {
+#deposerAnnonce section {
     border: 1px solid #CCCCCC;
 }
 
-.localisation{
-    border: 1px solid #CCCCCC;
+#deposerAnnonce section:first-child {
+    margin-top: 150px;
 }
 
 .form-group{
     width: 50%;
 }
 
-input:invalid {
+/* input:invalid {
     border: 2px dashed red;
-}
+} */
 
 /* Liste des annonces */
 
@@ -107,24 +100,35 @@ input:invalid {
 
 /*  Annonce */
 
-.photoAd{
-    width:50%; 
-    height: 100%; 
-    object-fit: cover;
-    background-color:#F2F2F2"
+.photoContainer {
+    height: 500px;
+    width: 100%;
+    padding: 15px;
+    border-bottom: solid 1px #CCCCCC;
 }
-
-.adPseudo{
-    margin: 15px;
+.photoContainer img{
+    height:100%;
+    width: 100%;
+    object-fit: cover;
+    object-position: center;
 }
 
 .adContainer{
     background-color:white; 
-    border: 1px solid #CCCCCC; 
-    width: 500px; 
-    height: 100%;
+    border: 1px solid #CCCCCC;
     padding: 20px;
 }
+
+.adContainer h2,
+.adContainer h3,
+.adContainer p {
+    padding: 0 15px;
+}
+
+.adContainer h3 {
+    margin: 15px 0;
+}
+
 
 .adPrice{
     background-color:#F2F2F2; 
@@ -144,6 +148,9 @@ input:invalid {
     padding: 5px;
 }
 .adDescription{
-    padding: 20px;
-    
+    padding: 20px;   
+}
+
+.pagination{
+    decoration: none;
 }

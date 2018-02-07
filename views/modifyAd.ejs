@@ -1,66 +1,126 @@
 <html>
         <% include partials/header.ejs %>
-<body style="background-color:#FAFAFA;">
+    <body style="background-color:#FAFAFA;">
 
-<div class="container">
-<div class="container votreAnnonce pr-0 pl-0" style="border: 1px solid #CCCCCC;">
-    <h6 class="sousTitre">Votre annonce</h6>
-    <div class=" sousForm">
-        <form class="formSize" action="/modify/<%=ads._id%>" method="POST" enctype="multipart/form-data">
-            <div class="form-group">
-                <label>Titre de l'annonce</label>
-                <input type="text" name="title" class="form-control" value="<%=ads.title%>">
-            </div>
-            <div class="form-group">
-                <label>Text de l'annonce</label>
-                <textarea class="form-control" name="description" rows="3" style="height: 200px;" value="<%=ads.description%>"></textarea>
-            </div>
-            <div class="form-group">
-                <label>Prix</label>
-                <input type="number" name="price" class="form-control" value="<%=ads.price%>">
-            </div>
-            <div class="form-group">
-                <label>Photo</label>
-                <input type="file" name="photo" class="form-control-file" alt="photo">
-                <div>
-                    <img class="mt-2" src="/uploads/<%=ads.photo%>" alt="">
+    <div class="container" id="deposerAnnonce">
+        <form class="needs-validation" novalidate action="/modify/<%=ads._id%>" method="POST" enctype="multipart/form-data">
+        <section class="mb-3">
+            <h6 class="sousTitre">Votre annonce</h6>
+            <div class="sousForm">
+                <div class="form-check form-check-inline mb-3">
+                    <input class="form-check-input" type="radio" name="type" value="offres" checked>
+                    <label class="form-check-label" for="inlineRadio1">Offres</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="type" value="demandes">
+                    <label class="form-check-label" for="inlineRadio2">Demandes</label>
+                </div>  
+                <div class="form-check form-check-inline mb-3 ml-5">
+                    <input class="form-check-input" type="radio" name="selection" value="particuliers" checked>
+                    <label class="form-check-label" for="inlineRadio1">Particuliers</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="selection" value="professionels">
+                    <label class="form-check-label" for="inlineRadio2">Professionnels</label>
+                </div>  
+                <div class="form-group">
+                    <label>Titre de l'annonce</label>
+                    <input type="text" name="title" class="form-control" value="<%=ads.title%>" required minlength="5" maxlength="50">
+                    <div class="invalid-feedback">
+                        Veuillez entrez des informations valide !
+                    </div>
                 </div>
-            </div>
-    </div>
-</div>
+                <div class="form-group">
+                    <label>Text de l'annonce</label>
+                    <textarea class="form-control" name="description" rows="3" value="<%=ads.description%>" style="height: 200px;" required></textarea>
+                    <div class="invalid-feedback">
+                        Veuillez entrez des informations valide !
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Prix</label>
+                    <input type="number" name="price" value="<%=ads.price%>" class="form-control" required>
+                    <div class="invalid-feedback">
+                        Veuillez entrez des informations valide !
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Photo</label>
+                    <input type="file" name="photo" class="form-control-file" alt="photo">
+                    <div>
+                        <img class="mt-2" src="/uploads/<%=ads.photo%>" alt="">
+                    </div>
+                </div>
+        </div>
+</section>
 
-<div class="container localisation pr-0 pl-0 mb-3" style="border: 1px solid #CCCCCC;">
+<section class="mb-3">
     <h6 class="sousTitre mb-0">Localisation</h6>
     <div class="sousForm pb-2 pt-2">
-            <div class="form-group">
-                <label>Ville ou code postal</label>
-                <input type="text" name="city" class="form-control" value="<%=ads.city%>">
+        <div class="form-group">
+            <label>Ville ou code postal</label>
+            <input type="text" name="city" class="form-control" value="<%=ads.city%>" required minlength="5" maxlength="20" value="<%= %>" required>
+            <div class="invalid-feedback">
+                Veuillez entrez des informations valide !
             </div>
+        </div>
     </div>
-</div>  
+</section>  
 
-<div class="container vosInformation pr-0 pl-0" style="border: 1px solid #CCCCCC;">
+<section>
     <h6 class="sousTitre mb-0">Vos informations</h6>
-    <div class=" sousForm">
+    <div class="sousForm">
             <div class="form-group">
                 <label>Pseudo</label>
-                <input type="text" name="pseudo" class="form-control" value="<%=ads.pseudo%>">
+                <input type="text" name="pseudo" class="form-control" value="<%=ads.pseudo%>" required minlength="2" maxlength="15">
+                <div class="invalid-feedback">
+                    Veuillez entrez des informations valide !
+                </div>
             </div>
             <div class="form-group">
                 <label>Email</label>
-                <input type="email" name="email" class="form-control" value="<%=ads.email%>">
+                <input type="email" name="email" id="mail" value="<%=ads.email%>" class="form-control" required>
+                <div class="invalid-feedback">
+                    Veuillez entrez des informations valide !
+                </div>
             </div>
             <div class="form-group">
                 <label>Téléphone</label>
-                <input type="number" name="phone" class="form-control" value="<%=ads.phone%>">
+                <input type="number" name="phone" value="<%=ads.phone%>" class="form-control" required>
+                <div class="invalid-feedback">
+                    Veuillez entrez des informations valide !
+                </div>
             </div>
             
         </div>  
-    </div>    
-            <button type="submit" class="btn btn-primary btn-lg mt-3 mb-5" style="width:200px; height:40px;">Modifier</button>
+    </section>    
+    <button type="submit" class="btn btn-primary btn-lg mt-3 mb-5" style="width:200px; height:40px;">Valider</button>
         
-        
-        </form>
+    </form>
+
+        <script>
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+              // Fetch all the forms we want to apply custom Bootstrap validation styles to
+              var forms = document.getElementsByClassName('needs-validation');
+              // Loop over them and prevent submission
+              var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                  if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                  }
+                  form.classList.add('was-validated');
+                }, false);
+              });
+            }, false);
+          })();
+          </script>
+
+
+
 </div>
 </body>
+<% include partials/footer.ejs %>
 </html>

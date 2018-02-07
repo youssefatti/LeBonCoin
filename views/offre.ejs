@@ -19,9 +19,16 @@
         </div>
     </a> 
     <%}%>
-
+    <ul class="d-flex pagination justify-content-around mt-3">
+        <% for(var i= 1; i < count; i++){ %>
+            <a href="/?page=<%= i %>"><li><%= i %></li></a>
+        <% }%>
+    </ul>
     </div>
 </div>
+
+
+
 
 </body>
 </html>

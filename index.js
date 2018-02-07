@@ -11,7 +11,6 @@ const app = express();
 
 var upload = multer({ dest: 'public/uploads/' });
 
-var ad = [];
 
 app.use(express.static("public"));
 
@@ -21,6 +20,8 @@ app.use(bodyParser.urlencoded({ extended: false }))
 // 1) Definir le schema - A faire qu'une fois
 var ads = new mongoose.Schema(
     {
+        selection: String,
+        type : String,
         title: String,
         description : String,
         price : Number,
@@ -34,36 +35,75 @@ var ads = new mongoose.Schema(
   // 2) Definir le model - A faire qu'une fois
   var Ads = mongoose.model("Ads", ads);
 
+var limit = 2;
 
+// Page d'accueil
 app.get('/', function(req, res){
-    
-    Ads.find({}, function(err, ads) {
+    var page = req.query.page;
+    Ads.count({}, function (err, count) {
         if (!err) {
-        //console.log(ads);
-        res.render("offre.ejs", {
-            ads,
-        });
-        }    
-});
+            Ads.find({}, function(err, ads) {
+                if (!err) {
+                console.log(page);
+                    res.render("offre.ejs", {
+                        ads,
+                        page,
+                        count
+                    });
+                }    
+            }).skip(page * limit - limit).limit(limit);
+        }
+      });
 })
 
-app.get('/deposer/', function(req, res){
-    
-res.render('depose.ejs');
+// Filtres des annonces
+app.get('/offres/', function(req, res){
+    Ads.find({ type: "offres" }).find(function (err, ads) {
+        res.render('offre.ejs', {
+      ads,
+        });
+    });
+});
 
-}); 
+app.get('/demandes/', function(req, res){
+    Ads.find({ type: "demandes" }).find(function (err, ads) {
+        res.render('offre.ejs', {
+      ads,
+        })
+    })
+})
 
+app.get('/particuliers/', function(req, res){
+    Ads.find({ selection: "particuliers" }).find(function (err, ads) {
+        res.render('offre.ejs', {
+      ads,
+        });
+    });
+});
+
+app.get('/professionels/', function(req, res){
+    Ads.find({ selection: "professionels" }).find(function (err, ads) {
+        res.render('offre.ejs', {
+      ads,
+        })
+    })
+})
+
+// Parti modification, recherche de la fiche a modifié dans la DB
 app.get('/modify/:id', function(req, res){
     var id = req.params.id;
 
     Ads.findById(id, function (err, ads) {
         res.render('modifyAd.ejs', {
-      ads,
+      ads
         })
     })
 }); 
 
+// Mise à jour de la fiche modifié
 app.post('/modify/:id', upload.single('photo'), function(req,res){
+    var selection = req.body.selection;
+    var type = req.body.type;
     var title = req.body.title;
     var description = req.body.description;
     var price = req.body.price;
@@ -75,6 +115,8 @@ app.post('/modify/:id', upload.single('photo'), function(req,res){
     var id = req.params.id;
  
     var updateAd = {
+        selection : selection,
+        type : type,
         title: title,
         description : description,
         price : price,
@@ -93,33 +135,36 @@ app.post('/modify/:id', upload.single('photo'), function(req,res){
       });
 });
 
+
+// Suppression d'un fiche
 app.post("/remove/:id", function(req, res){
     var id = req.params.id;
     
     Ads.findByIdAndRemove(id, function(err){
-        console.log("remove test " + " " + id)
+        //console.log("remove test " + " " + id)
         res.redirect("/");
     })
     
 })
 
+// Affichage d'une annonce unique
 app.get("/annonce/:id", function(req, res){
     var id = req.params.id;
-
-    // var index = _.findIndex(ad, function(o) { 
-    //     return o.id == id; 
-    // });
 
     Ads.findById(id, function (err, ads) {
           res.render('annonce.ejs', {
         ads,
+        })
     })
-      })
 })
 
-app.post('/deposer', upload.single('photo'), function(req,res){
+
+// Récupération des infos entré dans le formulaire
+app.post('/depose', upload.single('photo'), function(req,res){
 
     var ad = {
+        selection: req.body.selection,
+        type : req.body.type,
         title: req.body.title,
         description: req.body.description,
         price: req.body.price,
@@ -133,19 +178,8 @@ app.post('/deposer', upload.single('photo'), function(req,res){
     if (req.file){
         ad.photo = req.file.filename;
     }
-    //var photo = req.file.filename;
 
-    // var photoFile = document.getElementById('photoFile');
-    // photoFile.addEventListener("keyup", function (event) {
-    //     if(photoFile.validity.typeMismatch) {
-    //       email.setCustomValidity("Veuillez charger une photo");
-    //       var photo = "photo";
-    //     } else {
-    //       email.setCustomValidity("");
-    //       var photo = req.file.filename;
-    //     }
-    //   });
-
+    //console.log(ad.type)
 
     var newAd = new Ads(ad);
 
@@ -159,6 +193,34 @@ app.post('/deposer', upload.single('photo'), function(req,res){
     });
     
 });
+
+// Mise en ligne des infos du formulaire
+app.get('/depose/', function(req, res){
+    
+    res.render('depose.ejs');
+    
+    }); 
+
+// Fonction de validation du formulaire
+
+// (function() {
+//     'use strict';
+//     window.addEventListener('load', function() {
+//       // Fetch all the forms we want to apply custom Bootstrap validation styles to
+//       var forms = document.getElementsByClassName('needs-validation');
+//       // Loop over them and prevent submission
+//       var validation = Array.prototype.filter.call(forms, function(form) {
+//         form.addEventListener('submit', function(event) {
+//           if (form.checkValidity() === false) {
+//             event.preventDefault();
+//             event.stopPropagation();
+//           }
+//           form.classList.add('was-validated');
+//         }, false);
+//       });
+//     }, false);
+//   })();
+
 
 
 app.listen(3000, () => console.log('Server is Listing!'));
