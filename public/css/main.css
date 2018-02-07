@@ -1,0 +1,149 @@
+/* Font family */
+*{
+    font-family: 'Open Sans', sans-serif; 
+} 
+
+/* Header */
+
+.navbar{
+    height: 60px;
+    background-color: #E6723D;
+}
+
+.header span{
+    display: flex;
+    left: 0px;
+    color: white;
+    font-size: 13px;
+    line-height: 60px;
+}
+.container>a{
+    text-decoration: none;
+}
+
+/* Formulaire */
+
+.votreAnnonce{
+    margin-top: 150px;
+    margin-bottom: 20px;
+    background-color:white;
+    border: 1px solid #CCCCCC;
+}
+
+.sousForm{
+    background-color: white;
+    padding: 10px 15px;
+}
+
+.sousTitre{
+    height: 40px;
+    width: 100%;
+    background-color: #666666;
+    padding: 10px;
+    color: white;
+}
+
+.vosInformation {
+    border: 1px solid #CCCCCC;
+}
+
+.localisation{
+    border: 1px solid #CCCCCC;
+}
+
+.form-group{
+    width: 50%;
+}
+
+input:invalid {
+    border: 2px dashed red;
+}
+
+/* Liste des annonces */
+
+.annonce{
+    padding-top: 200px;
+}
+
+.sousContainer{
+    width: 80%;
+}
+
+.photoImg{
+    background-color: #CCCCCC;
+    object-fit: cover;
+    width: 200px;
+    height: 120px;
+}
+
+.title{
+    color: #4977BA;
+}
+
+.city{
+    color: black;
+}
+
+.price{
+    color: #E6723D;
+}
+
+.fiche{
+    background-color:white;
+    padding: 25px;
+    border: 1px solid #CCCCCC;
+    height: 170px;
+}
+
+.fiche:hover{
+    background-color: #F2F2F2;
+}
+
+.photo{
+    width: 200px;
+    height: 120px;
+    margin-right: 25px;
+}
+
+/*  Annonce */
+
+.photoAd{
+    width:50%; 
+    height: 100%; 
+    object-fit: cover;
+    background-color:#F2F2F2"
+}
+
+.adPseudo{
+    margin: 15px;
+}
+
+.adContainer{
+    background-color:white; 
+    border: 1px solid #CCCCCC; 
+    width: 500px; 
+    height: 100%;
+    padding: 20px;
+}
+
+.adPrice{
+    background-color:#F2F2F2; 
+    padding: 10px;  
+    width: 170px;
+    height: 40px; 
+}
+.adsPrice{
+    margin-left: 50px;
+    padding: 5px;
+    font-weight: bold;
+    color:  #E6723D; 
+}
+
+.adsCity{
+    margin-left: 50px;
+    padding: 5px;
+}
+.adDescription{
+    padding: 20px;
+    
+}

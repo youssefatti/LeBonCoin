@@ -1,0 +1,27 @@
+<html>
+        <% include partials/header.ejs %>
+<body>
+    
+<div class="container annonce d-flex justify-content-center">
+    <div class= "sousContainer">
+
+    <% for(var i=0; i < ads.length; i++){ %>
+    <a href="http://localhost:3000/annonce/<%=ads[i]._id%>">
+        <div class="row d-flex fiche">
+            <div class="photo">
+                <img class="photoImg" src="/uploads/<%= ads[i].photo || "default.png" %>" alt="photo">
+            </div>
+            <div>
+                <h6 class="title"><%=ads[i].title%></h6>
+                <h6 class="city"><%=ads[i].city%></h6>
+                <h6 class="price"><%=ads[i].price%> €</h6>
+            </div>
+        </div>
+    </a> 
+    <%}%>
+
+    </div>
+</div>
+
+</body>
+</html>
