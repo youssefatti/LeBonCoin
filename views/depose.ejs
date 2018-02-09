@@ -46,7 +46,7 @@
             </div>
             <div class="form-group">
                 <label>Photo</label>
-                <input type="file" name="photo" class="form-control-file" alt="photo">
+                <input type="file" multiple=" " name="photo" class="form-control-file" alt="photo">
             </div>
     </div>
 </section>
@@ -95,25 +95,25 @@
         
     </form>
 
-        <script>
-        (function() {
-            'use strict';
-            window.addEventListener('load', function() {
-              // Fetch all the forms we want to apply custom Bootstrap validation styles to
-              var forms = document.getElementsByClassName('needs-validation');
-              // Loop over them and prevent submission
-              var validation = Array.prototype.filter.call(forms, function(form) {
-                form.addEventListener('submit', function(event) {
-                  if (form.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                  }
-                  form.classList.add('was-validated');
-                }, false);
-              });
+<script>
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.getElementsByClassName('needs-validation');
+            // Loop over them and prevent submission
+            var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+                }
+                form.classList.add('was-validated');
             }, false);
-          })();
-          </script>
+            });
+        }, false);
+        })();
+</script>
 </div>
 </body>
 <% include partials/footer.ejs %>

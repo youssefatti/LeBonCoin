@@ -6,6 +6,20 @@
     <div class= "sousContainer">
 
     <% for(var i=0; i < ads.length; i++){ %>
+        <% if(i%10===0 && i !==0) { %>
+            <a href="https://www.lereacteur.io/" target="_blank">
+                <div class="row d-flex fiche">
+                    <div class="photo">
+                        <img class="photoImg" src="/uploads/lereacteur.png" %>" alt="photo">
+                    </div>
+                    <div>
+                        <h6 class="title">LeReacteur</h6>
+                        <h6 class="city">Paris</h6>
+                        <h6 class="price">Devenez un Pro du dévelopement Web & mobile</h6>
+                    </div>
+                </div>
+            </a> 
+        <% }%>
     <a href="http://localhost:3000/annonce/<%=ads[i]._id%>">
         <div class="row d-flex fiche">
             <div class="photo">
@@ -19,16 +33,9 @@
         </div>
     </a> 
     <%}%>
-    <ul class="d-flex pagination justify-content-around mt-3">
-        <% for(var i= 1; i < count; i++){ %>
-            <a href="/?page=<%= i %>"><li><%= i %></li></a>
-        <% }%>
-    </ul>
+
     </div>
 </div>
-
-
-
 
 </body>
 </html>

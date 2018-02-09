@@ -1,92 +1,190 @@
 const express = require('express');
+var expressSession = require('express-session');    
 const bodyParser = require('body-parser');
 const ejs = require('ejs');
 const multer  = require('multer')
 const uniqid = require('uniqid');
 const _ = require("lodash");
+var MongoStore = require('connect-mongo')(expressSession);
 const mongoose = require("mongoose");
+var passport = require('passport');
+var LocalStrategy = require('passport-local');
+var User = require('./models/user');
+var Ads = require('./models/ad');
 
+// Connexion au serveur mongoose
 mongoose.connect("mongodb://localhost:27017/leboncoin");
+
 const app = express();
 
 var upload = multer({ dest: 'public/uploads/' });
 
+// Permet de ne pas mettre les .ejs dans les render
+app.set('view engine', 'ejs');
 
+// activation de la récupération des infos récupérer dans un formulaire
+app.use(bodyParser.urlencoded({extended: true}));
+
+// Activer la gestion de la session
+app.use(expressSession({
+  secret: 'thereactor09',
+  resave: false,
+  saveUninitialized: false,
+  store: new MongoStore({mongooseConnection: mongoose.connection})
+}));
+
+// Activer `passport`
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser()); // JSON.stringify
+passport.deserializeUser(User.deserializeUser()); // JSON.parse
+
+// permet l'acces aux element du dossier public
 app.use(express.static("public"));
 
 app.use(bodyParser.urlencoded({ extended: false }))
 
 
 // 1) Definir le schema - A faire qu'une fois
-var ads = new mongoose.Schema(
-    {
-        selection: String,
-        type : String,
-        title: String,
-        description : String,
-        price : Number,
-        city: String,
-        pseudo: String,
-        email: String,
-        phone: String,
-        photo: String
-    });
+// var ads = new mongoose.Schema(
+//     {
+//         selection: String,
+//         type : String,
+//         title: String,
+//         description : String,
+//         price : Number,
+//         city: String,
+//         pseudo: String,
+//         email: String,
+//         phone: String,
+//         photo: String
+//     });
   
-  // 2) Definir le model - A faire qu'une fois
-  var Ads = mongoose.model("Ads", ads);
+//   // 2) Definir le model - A faire qu'une fois
+//   var Ads = mongoose.model("Ads", ads);
 
-var limit = 2;
+var limit = 15;
+var nbrPages;  
 
 // Page d'accueil
 app.get('/', function(req, res){
-    var page = req.query.page;
-    Ads.count({}, function (err, count) {
+    //var page = req.query.page;
+    Ads.find({}, function(err, ads) {
         if (!err) {
-            Ads.find({}, function(err, ads) {
-                if (!err) {
-                console.log(page);
-                    res.render("offre.ejs", {
-                        ads,
-                        page,
-                        count
-                    });
-                }    
-            }).skip(page * limit - limit).limit(limit);
-        }
-      });
+            res.render("offre", {
+                ads,
+            });
+        }       
+    })
+    
+
+    // Partie avec la pagination
+    // Ads.count({}, function (err, count) {
+    //     if (!err) {
+    //         nbrPages = Math.ceil(count/limit);
+    //         Ads.find({}, function(err, ads) {
+    //             if (!err) {
+    //                 res.render("offre", {
+    //                     ads,
+    //                     nbrPages,
+    //                     count
+    //                 });
+    //             }    
+    //         }).skip(nbrPages * limit - limit).limit(limit);
+    //     }
+    //   });
 })
 
 // Filtres des annonces
 app.get('/offres/', function(req, res){
-    Ads.find({ type: "offres" }).find(function (err, ads) {
-        res.render('offre.ejs', {
-      ads,
-        });
-    });
+
+    Ads.find({ type: "offres" }, function (err, ads) {
+        if (!err) {
+            res.render("offre", {
+                ads,
+            });
+        }    
+    })
+
+    // Partie avec pagination
+    // Ads.count({}, function (err, count) {
+    //     if (!err) {
+    //         var nbrPages = Math.ceil(count/limit);
+    //         Ads.find({ type: "offres" }).find(function (err, ads) {
+    //             if (!err) {
+    //                 res.render("offre", {
+    //                     ads,
+    //                     nbrPages,
+    //                     count
+    //                 });
+    //             }    
+    //         }).skip(nbrPages * limit - limit).limit(limit);
+    //     }
+    // });
 });
 
 app.get('/demandes/', function(req, res){
-    Ads.find({ type: "demandes" }).find(function (err, ads) {
-        res.render('offre.ejs', {
-      ads,
-        })
+
+    Ads.find({ type: "demandes" }, function (err, ads) {
+        if (!err) {
+            res.render("offre", {
+                ads,
+            });
+        }    
     })
+
+
+    // Partie avec la pagination
+    // Ads.count({}, function (err, count) {
+    //     if (!err) {
+    //         nbrPages = Math.ceil(count/limit);
+    //         Ads.find({type: "demandes"}, function(err, ads) {
+    //             if (!err) {
+    //                 res.render("offre", {
+    //                     ads,
+    //                     nbrPages,
+    //                     count
+    //                 });
+    //             }    
+    //         }).skip(nbrPages * limit - limit).limit(limit);
+    //     }
+    //   });
 })
 
 app.get('/particuliers/', function(req, res){
-    Ads.find({ selection: "particuliers" }).find(function (err, ads) {
-        res.render('offre.ejs', {
-      ads,
-        });
-    });
+    Ads.count({}, function (err, count) {
+        if (!err) {
+            nbrPages = Math.ceil(count/limit);
+            Ads.find({ selection: "particuliers" }, function(err, ads) {
+                if (!err) {
+                    res.render("offre", {
+                        ads,
+                        nbrPages,
+                        count
+                    });
+                }    
+            }).skip(nbrPages * limit - limit).limit(limit);
+        }
+      });
 });
 
 app.get('/professionels/', function(req, res){
-    Ads.find({ selection: "professionels" }).find(function (err, ads) {
-        res.render('offre.ejs', {
-      ads,
-        })
-    })
+    Ads.count({}, function (err, count) {
+        if (!err) {
+            nbrPages = Math.ceil(count/limit);
+            Ads.find({ selection: "professionels" }, function(err, ads) {
+                if (!err) {
+                    res.render("offre", {
+                        ads,
+                        nbrPages,
+                        count
+                    });
+                }    
+            }).skip(nbrPages * limit - limit).limit(limit);
+        }
+      });
 })
 
 // Parti modification, recherche de la fiche a modifié dans la DB
@@ -94,7 +192,7 @@ app.get('/modify/:id', function(req, res){
     var id = req.params.id;
 
     Ads.findById(id, function (err, ads) {
-        res.render('modifyAd.ejs', {
+        res.render('modifyAd', {
       ads
         })
     })
@@ -128,9 +226,9 @@ app.post('/modify/:id', upload.single('photo'), function(req,res){
     
     };
 
+    // recherche dans la base de donnée l'id et met à jour l'annonce correspondante
     Ads.findByIdAndUpdate(id, updateAd, {new: true}, function (err, updateAd) {
         if (err) return console.log(err);
-        // console.log( "Dans le findByIdUpdate la creation du updateAd "+id)
         res.redirect("/annonce/" + id);
       });
 });
@@ -140,8 +238,8 @@ app.post('/modify/:id', upload.single('photo'), function(req,res){
 app.post("/remove/:id", function(req, res){
     var id = req.params.id;
     
+    // recherche dans la base de donnée l'id et supprime l'annonce correspondante
     Ads.findByIdAndRemove(id, function(err){
-        //console.log("remove test " + " " + id)
         res.redirect("/");
     })
     
@@ -150,14 +248,26 @@ app.post("/remove/:id", function(req, res){
 // Affichage d'une annonce unique
 app.get("/annonce/:id", function(req, res){
     var id = req.params.id;
+    //var userId = req.cookies;
+    var userid = req.user._id;
+
+    Ads.find(userid, function(err, ads){
+        console.log("user id du cookies"+ ads.user_id);
+    })
+    console.log("user id du cookies");
+    console.log("user id du user_id" + userid);
 
     Ads.findById(id, function (err, ads) {
-          res.render('annonce.ejs', {
-        ads,
+        res.render('annonce', {
+            ads,
         })
+        
     })
 })
 
+// Ads.find((userId), function(err, ads){
+           
+// })
 
 // Récupération des infos entré dans le formulaire
 app.post('/depose', upload.single('photo'), function(req,res){
@@ -171,15 +281,16 @@ app.post('/depose', upload.single('photo'), function(req,res){
         city: req.body.city,
         pseudo: req.body.pseudo,
         email: req.body.email,
-        phone: req.body.phone
+        phone: req.body.phone,
+        user_id : req.user._id
 
     }
+
+console.log("user id de l'utilisateur afin de lui associer ces annonces "+ " " +ad.user_id)
 
     if (req.file){
         ad.photo = req.file.filename;
     }
-
-    //console.log(ad.type)
 
     var newAd = new Ads(ad);
 
@@ -197,77 +308,110 @@ app.post('/depose', upload.single('photo'), function(req,res){
 // Mise en ligne des infos du formulaire
 app.get('/depose/', function(req, res){
     
-    res.render('depose.ejs');
+    res.render('depose');
     
     }); 
 
-// Fonction de validation du formulaire
+// Mes annonces
+app.get('/myAds/', function(req, res){
+    var id = req.user._id;
 
-// (function() {
-//     'use strict';
-//     window.addEventListener('load', function() {
-//       // Fetch all the forms we want to apply custom Bootstrap validation styles to
-//       var forms = document.getElementsByClassName('needs-validation');
-//       // Loop over them and prevent submission
-//       var validation = Array.prototype.filter.call(forms, function(form) {
-//         form.addEventListener('submit', function(event) {
-//           if (form.checkValidity() === false) {
-//             event.preventDefault();
-//             event.stopPropagation();
-//           }
-//           form.classList.add('was-validated');
-//         }, false);
-//       });
-//     }, false);
-//   })();
+    //console.log(req.users)
+    
+    User.find({}), function(err, user){
+        if (!err) {
+            console.log(user)
+        }  
+    }
 
+    Ads.find({ user_id: id }, function(err, ads) {
+        if (!err) {
+            res.render("offre", {
+                ads,
+            });
+        }    
+    });
 
+// Partie avec
+//     Ads.count({}, function (err, count) {
+//         if (!err) {
+//             nbrPages = Math.ceil(count/limit);
+//     Ads.find({ user_id: id }, function(err, ads) {
+//         if (!err) {
+//             res.render("offre", {
+//                 ads,
+//                 nbrPages,
+//                 count
+//             });
+//         }    
+//     }).skip(nbrPages * limit - limit).limit(limit);
 
-app.listen(3000, () => console.log('Server is Listing!'));
-
-
-
-// var newAd = new Ads({
-//     title: "Bras essuie glace",
-//     description : "Equipement voiture mégane",
-//     price : 20,
-//     city: "Saint-Just-en-Chaussée",
-//     pseudo: "Jo",
-//     email: "youssefattia@gmail.com",
-//     phone: "0695908756",
-//     photo: "lbc_bras_essuie_glace.jpg"
-
-// });
-
-// newAd.save(function(err, obj) {
-// if (err) {
-//   console.log("something went wrong");
-// } else {
-//   console.log("we just saved the new student " + obj.title);
 // }
 // });
+    
+}); 
 
-// var newAd1 = new Ads({
-// title: "Gps volkswagen",
-// description : "Equipement voiture golf 2017",
-// price : 380,
-// city: "Saint-Georges-sur-Baulche",
-// pseudo: "Jo",
-// email: "youssef@gmail.com",
-// phone: "0014567892",
-// photo: "lbc_gps.jpg"
+// ***** Parti authentification ********//
 
-// });
-// newAd1.save(function(err, obj) {
-//     if (err) {
-//       console.log("something went wrong");
-//     } else {
-//       console.log("we just saved the new student " + obj.title);
+app.get('/myAccount', function(req, res) {
+    console.log("affichage du user id "+req.user._id)
 
-//       Ads.find({}, function(err, ads) {
-//         if (!err) {
-//          // console.log(ads);
-//         }
-//     });
-//   }
-// });
+    if (req.isAuthenticated()) {
+      console.log("hello je suis conecté "+req.user);
+      res.render('myAccount');
+    } else {
+      res.redirect('/offre');
+    }
+  });
+  
+  app.get('/register', function(req, res) {
+    if (req.isAuthenticated()) {
+      res.redirect('/myAccount');
+    } else {
+      res.render('register');
+    }
+  });
+  
+  app.post('/register', function(req, res) {
+    // Créer un utilisateur, en utilisant le model defini
+    // Nous aurons besoin de `req.body.username` et `req.body.password`
+    User.register(
+      new User({
+        username: req.body.username,
+        email: req.body.email,       
+      }),
+      req.body.password, // password will be hashed
+      function(err, user) {
+        if (err) {
+          console.log(err);
+          return res.render('register');
+        } else {
+          passport.authenticate('local')(req, res, function() {
+            res.redirect('/myAccount');
+          });
+        }
+      }
+    );
+    //console.log(req.sessionID)
+  });
+  
+  app.get('/login', function(req, res) {
+    if (req.isAuthenticated()) {
+      res.redirect('/myAccount');
+    } else {
+      res.render('login');
+    }
+  });
+  
+  app.post('/login', passport.authenticate('local', {
+    successRedirect: '/myAccount',
+    failureRedirect: '/login'
+  }));
+  
+  app.get("/logout", function(req, res) {
+    req.logout();
+    res.redirect('/');
+  });
+  
+
+app.listen(3000, () => console.log('Server is Listing!'));

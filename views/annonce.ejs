@@ -31,9 +31,14 @@
                 </div>
             </div>
                 <div>
-                    <a href="/modify/<%=ads._id%>"><button class="btn btn-primary mb-2">Modifier l'annonce</button></a>
+                    <% if(userId)
+                    <a href="/modify/<%=ads._id%>">
+                        <button class="btn btn-primary mb-2">Modifier l'annonce</button>
+                    </a>
                     <form class="" action="/remove/<%=ads._id%>" method="POST">
-                        <a href="/remove/<%=ads._id%>"><button class="btn btn-primary" type="submit" value="">Supprimer l'annonce</button></a>
+                        <a href="/remove/<%=ads._id%>">
+                            <button class="btn btn-primary" type="submit" value="">Supprimer l'annonce</button>
+                        </a>
                     </form>
                 </div>
         </div> 
