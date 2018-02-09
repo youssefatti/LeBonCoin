@@ -64,9 +64,10 @@
     </div>
 </section>  
 
-<section>
-    <h6 class="sousTitre mb-0">Vos informations</h6>
-    <div class="sousForm">
+<% if(!isLogin){ %>
+    <section>
+        <h6 class="sousTitre mb-0">Vos informations</h6>
+        <div class="sousForm">
             <div class="form-group">
                 <label>Pseudo</label>
                 <input type="text" name="pseudo" class="form-control" required minlength="2" maxlength="15">
@@ -82,6 +83,20 @@
                 </div>
             </div>
             <div class="form-group">
+                <label>Mot de Passe</label>
+                <input type="text" name="testpassword" id="testPassword" class="form-control" required>
+                <div class="invalid-feedback">
+                    Veuillez entrez des informations valide !
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Confirmer votre mot de passe</label>
+                <input type="text" name="password" id="password" class="form-control" required>
+                <div class="invalid-feedback">
+                    Veuillez entrez des informations valide !
+                </div>
+            </div>
+            <div class="form-group">
                 <label>Téléphone</label>
                 <input type="number" name="phone" class="form-control" required>
                 <div class="invalid-feedback">
@@ -91,6 +106,7 @@
             
         </div>  
     </section>    
+<%}%>
     <button type="submit" class="btn btn-primary btn-lg mt-3 mb-5" style="width:200px; height:40px;">Valider</button>
         
     </form>

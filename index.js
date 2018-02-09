@@ -70,31 +70,25 @@ var nbrPages;
 
 // Page d'accueil
 app.get('/', function(req, res){
-    //var page = req.query.page;
-    Ads.find({}, function(err, ads) {
-        if (!err) {
-            res.render("offre", {
-                ads,
-            });
-        }       
-    })
-    
+    // Recupération de la page en cours pour la pagination
+    var currentPage = req.query.page;
 
-    // Partie avec la pagination
-    // Ads.count({}, function (err, count) {
-    //     if (!err) {
-    //         nbrPages = Math.ceil(count/limit);
-    //         Ads.find({}, function(err, ads) {
-    //             if (!err) {
-    //                 res.render("offre", {
-    //                     ads,
-    //                     nbrPages,
-    //                     count
-    //                 });
-    //             }    
-    //         }).skip(nbrPages * limit - limit).limit(limit);
-    //     }
-    //   });
+    //Partie avec la pagination
+    Ads.count({}, function (err, count) { // Count permet de récupérer le nombre total d'annonce
+        if (!err) {
+            // Calcul du nombre de page
+            nbrPages = Math.ceil(count/limit);
+            Ads.find({}, function(err, ads) {
+                if (!err) {
+                    res.render("offre", {
+                        ads,
+                        nbrPages,
+                        currentPage
+                    });
+                }    
+            }).skip(currentPage * limit - limit).limit(limit); // Afichage de la page en cours avec le bon nombre d'annonce
+        }
+      });
 })
 
 // Filtres des annonces
@@ -154,37 +148,52 @@ app.get('/demandes/', function(req, res){
 })
 
 app.get('/particuliers/', function(req, res){
-    Ads.count({}, function (err, count) {
-        if (!err) {
-            nbrPages = Math.ceil(count/limit);
-            Ads.find({ selection: "particuliers" }, function(err, ads) {
-                if (!err) {
-                    res.render("offre", {
-                        ads,
-                        nbrPages,
-                        count
-                    });
-                }    
-            }).skip(nbrPages * limit - limit).limit(limit);
-        }
-      });
+    Ads.find({ selection: "particuliers" }, function(err, ads) {
+            if (!err) {
+                res.render("offre", {
+                    ads,
+                });
+            }    
+        })
+
+    // Ads.count({}, function (err, count) {
+    //     if (!err) {
+    //         nbrPages = Math.ceil(count/limit);
+    //         Ads.find({ selection: "particuliers" }, function(err, ads) {
+    //             if (!err) {
+    //                 res.render("offre", {
+    //                     ads,
+    //                     nbrPages,
+    //                     count
+    //                 });
+    //             }    
+    //         }).skip(nbrPages * limit - limit).limit(limit);
+    //     }
+    //   });
 });
 
 app.get('/professionels/', function(req, res){
-    Ads.count({}, function (err, count) {
+    Ads.find({ selection: "professionels" }, function(err, ads) {
         if (!err) {
-            nbrPages = Math.ceil(count/limit);
-            Ads.find({ selection: "professionels" }, function(err, ads) {
-                if (!err) {
-                    res.render("offre", {
-                        ads,
-                        nbrPages,
-                        count
-                    });
-                }    
-            }).skip(nbrPages * limit - limit).limit(limit);
-        }
-      });
+            res.render("offre", {
+                ads,
+            });
+        }    
+    })
+    // Ads.count({}, function (err, count) {
+    //     if (!err) {
+    //         nbrPages = Math.ceil(count/limit);
+    //         Ads.find({ selection: "professionels" }, function(err, ads) {
+    //             if (!err) {
+    //                 res.render("offre", {
+    //                     ads,
+    //                     nbrPages,
+    //                     count
+    //                 });
+    //             }    
+    //         }).skip(nbrPages * limit - limit).limit(limit);
+    //     }
+    //   });
 })
 
 // Parti modification, recherche de la fiche a modifié dans la DB
@@ -211,35 +220,52 @@ app.post('/modify/:id', upload.single('photo'), function(req,res){
     var phone = req.body.phone;
     var photo = req.file.filename;
     var id = req.params.id;
+    //var user_id = ads.user_id;
  
-    var updateAd = {
-        selection : selection,
-        type : type,
-        title: title,
-        description : description,
-        price : price,
-        city: city,
-        pseudo: pseudo,
-        email: email,
-        phone: phone,
-        photo: photo
-    
-    };
+//console.log("console log dans la modif"+ads.user_id)
 
-    // recherche dans la base de donnée l'id et met à jour l'annonce correspondante
-    Ads.findByIdAndUpdate(id, updateAd, {new: true}, function (err, updateAd) {
-        if (err) return console.log(err);
-        res.redirect("/annonce/" + id);
-      });
+    Ads.findById(id, function(err, ads){
+        var updateAd = {
+            selection : selection,
+            type : type,
+            title: title,
+            description : description,
+            price : price,
+            city: city,
+            pseudo: pseudo,
+            email: email,
+            phone: phone,
+            photo: photo,
+            user_id: ads.user_id
+        };
+        if (req.isAuthenticated()) {
+            if (ads.user_id == req.user._id){
+                Ads.findByIdAndUpdate(id, updateAd, {new: true}, function (err, updateAd) {
+                        if (err) return console.log(err);
+                        res.redirect("/annonce/" + id);
+                        console.log("Annonce modifié"+ads.user_id);
+                      });
+            }
+        }
+        
+    })
 });
 
 
 // Suppression d'un fiche
 app.post("/remove/:id", function(req, res){
     var id = req.params.id;
+    var userid = req.user._id;
     
     // recherche dans la base de donnée l'id et supprime l'annonce correspondante
-    Ads.findByIdAndRemove(id, function(err){
+    console.log("verification si user egale a l'annonce"+userid)
+    Ads.findById(id, function(err,ads){
+        if (req.isAuthenticated()) {
+            if (ads.user_id == userid){
+                console.log("Authentifié et proprio de l'annonce");
+            }
+          } 
+        console.log(ads.user_id)
         res.redirect("/");
     })
     
@@ -248,30 +274,22 @@ app.post("/remove/:id", function(req, res){
 // Affichage d'une annonce unique
 app.get("/annonce/:id", function(req, res){
     var id = req.params.id;
-    //var userId = req.cookies;
-    var userid = req.user._id;
-
-    Ads.find(userid, function(err, ads){
-        console.log("user id du cookies"+ ads.user_id);
-    })
-    console.log("user id du cookies");
-    console.log("user id du user_id" + userid);
-
+    //var user_id = req.user_id;
+    if (!req.user) var userid = null
+    if (req.user) var userid = req.user._id
+    
     Ads.findById(id, function (err, ads) {
         res.render('annonce', {
             ads,
-        })
-        
+            userid
+        })  
     })
 })
 
-// Ads.find((userId), function(err, ads){
-           
-// })
-
 // Récupération des infos entré dans le formulaire
 app.post('/depose', upload.single('photo'), function(req,res){
-
+    // Dans le cas ou il n'est pas enregistré, il crée son compte
+            
     var ad = {
         selection: req.body.selection,
         type : req.body.type,
@@ -282,33 +300,35 @@ app.post('/depose', upload.single('photo'), function(req,res){
         pseudo: req.body.pseudo,
         email: req.body.email,
         phone: req.body.phone,
-        user_id : req.user._id
-
+        user_id : user._id
+        //user_id : req.user._id
     }
-
-console.log("user id de l'utilisateur afin de lui associer ces annonces "+ " " +ad.user_id)
-
     if (req.file){
         ad.photo = req.file.filename;
     }
 
     var newAd = new Ads(ad);
-
+    
     newAd.save(function(err, obj) {
         if (err) {
-          console.log("something went wrong");
+        console.log("something went wrong");
         } else {
-          //console.log("we just saved the new student " + obj.title);
-          res.redirect("/annonce/" + newAd._id);
-      }
-    });
-    
+            console.log("login prob")
+            res.redirect("/annonce/" + newAd._id);
+            }
+    });    
 });
 
 // Mise en ligne des infos du formulaire
 app.get('/depose/', function(req, res){
-    
-    res.render('depose');
+    var isLogin = req.isAuthenticated();
+    //console.log(requ);
+    // S'excute quand je click sur le bouton déposer une annonce et renvoi vers le fichier depose
+  
+    //console.log("hello")
+    res.render('depose', {
+        isLogin
+    });
     
     }); 
 
