@@ -5,6 +5,8 @@
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700" rel="stylesheet">
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="/jquery/script.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> 
 </head>
@@ -14,15 +16,57 @@
                 <a class="navbar-brand" href="#">
                     <img src="https://static.leboncoin.fr/img/logo.svg" width="140" height="40" alt="">
                 </a>
-                <a href="/"><span>ACCUEIL</span></a>
-                <a href="/depose"><span>DÉPOSER UNE ANNONCE</span></a>
-                <a href="/offres"><span>OFFRES</span></a>
-                <a href="/demandes"><span>DEMANDES</span></a>
-                <a href="/particuliers"><span>PARTICULIERS</span></a>
-                <a href="/professionels"><span>PROFESSIONELS</span></a>
-                <a href='/login'><span>Login</span></a>
-                <a href='/logout'><span>Log Out</span></a>
-                <a href='/register'><span>Register</span></a>
+              
+                    <a href="/"><span>ACCUEIL</span></a>
+                    <a href="/depose"><span>DÉPOSER UNE ANNONCE</span></a>
+                    <a href="/?type=offres"><span>OFFRES</span></a>
+                    <a href="/?type=demandes"><span>DEMANDES</span></a>
+                    <!-- <a href="/particuliers"><span>PARTICULIERS</span></a>
+                    <a href="/professionels"><span>PROFESSIONELS</span></a> -->
+                    <!-- <a href='/login'><span>Login</span></a>
+                    <a href='/logout'><span>Log Out</span></a>
+                    <a href='/register'><span>Register</span></a> -->
+                    <button class="btnConnect"type="button" data-toggle="modal" data-target="#connectModal">
+                            <span id="userConnet">Se Connecter</span>
+                    </button> 
+            
             </div>
         </nav> 
     </header>
+
+    <div class="modal fade" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title text-center" id="exampleModalLabel">Connexion</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <form action='/login' method='POST'>
+                    <div class="form-group">
+                        <label for="recipient-name" name='username' class="col-form-label">Pseudo</label>
+                        <input type='text' class="form-control" id="recipient-name" name='username'/>
+                    </div>
+                    <div class="form-group">
+                      <label for="recipient-name" name='email' class="col-form-label">Adresse email</label>
+                      <input type="email" class="form-control" id="recipient-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="recipient-name" class="col-form-label">Mot de passe</label>
+                        <input type="password" name='password' class="form-control" id="recipient-name"> 
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Se connecter</button>
+                    </div>
+                  </form>
+                </div>
+                <div class="modal-footer">
+                    <h5 class="modal-title text-center" id="exampleModalLabel">Vous n'avez pas de compte ?</h5>
+                    <button type="button" class="btn btn-primary">Créer un compte</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          

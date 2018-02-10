@@ -12,13 +12,17 @@
 
 .header span{
     display: flex;
+
     left: 0px;
     color: white;
     font-size: 13px;
-    line-height: 60px;
 }
 .container>a{
     text-decoration: none;
+}
+
+.btnConnect{
+    background-color: #D8774A;
 }
 
 /* Formulaire */
@@ -44,8 +48,12 @@
     margin-top: 150px;
 }
 
+.formModify{
+    width: 100%;
+}
+
 .form-group{
-    width: 50%;
+    width: 50%;    
 }
 
 /* input:invalid {
@@ -151,6 +159,22 @@
     padding: 20px;   
 }
 
-/* .pagination{
-    decoration: none;
+.phoneNumber{
+    display: none;
+}
+
+/* .photoContainer img{
+    display: block;
 } */
+
+.photoContainer img:first-child{
+    display: block;
+}
+
+.photoContainer img:last-child{
+    display: none;
+}
+
+.photoContainer img:nth-child(2){
+    display: none;
+}

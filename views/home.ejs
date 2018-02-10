@@ -6,7 +6,6 @@
     <div class= "sousContainer">
 
     <% for(var i=0; i < ads.length; i++){ %>
-   
         <a href="http://localhost:3000/annonce/<%=ads[i]._id%>">
             <div class="row d-flex fiche">
                 <div class="photo">
@@ -38,21 +37,22 @@
     </div>
 </div>
 
-
     <nav aria-label="Page navigation example" class="mt-4">
         <ul class="pagination justify-content-center">
             <li class="page-item">
-            <a class="page-link" href="/?page=<%=currentPage-1%>" tabindex="-1">Précedent</a>
+            <a class="page-link" href="/?page=<%=currentPage-1%>&type=<%=type%>" tabindex="-1">Précedent</a>
             </li>
-            <li class="page-item"><a class="page-link" href="/?page=1">1</a></li>
+            <li class="page-item"><a class="page-link" href="/?page=1&type=<%=type%>">1</a></li>
             <% for(var i=2; i<= nbrPages; i++){%>
-            <li class="page-item"><a class="page-link" href="/?page=<%=i%>"><%=i%></a></li>
+            <li class="page-item"><a class="page-link" href="/?page=<%=i%>&type=<%=type%>"><%=i%></a></li>
             <%}%>
             <li class="page-item">
-            <a class="page-link" href="/?page=<%=currentPage+1%>">Suivant</a>
+            <a class="page-link" href="/?page=<%=currentPage+1%>&type=<%=type%>">Suivant</a>
             </li>
         </ul>
     </nav>
+
+
 
 
 </body>

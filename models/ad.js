@@ -11,7 +11,7 @@ var ads = new mongoose.Schema(
         pseudo: String,
         email: String,
         phone: String,
-        photo: String,
+        photo: Array,
         user_id : String
     });
   

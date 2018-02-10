@@ -44,113 +44,64 @@ passport.deserializeUser(User.deserializeUser()); // JSON.parse
 // permet l'acces aux element du dossier public
 app.use(express.static("public"));
 
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({ extended: false }));
 
-
-// 1) Definir le schema - A faire qu'une fois
-// var ads = new mongoose.Schema(
-//     {
-//         selection: String,
-//         type : String,
-//         title: String,
-//         description : String,
-//         price : Number,
-//         city: String,
-//         pseudo: String,
-//         email: String,
-//         phone: String,
-//         photo: String
-//     });
-  
-//   // 2) Definir le model - A faire qu'une fois
-//   var Ads = mongoose.model("Ads", ads);
-
-var limit = 15;
+var limit = 11;
 var nbrPages;  
 
 // Page d'accueil
 app.get('/', function(req, res){
     // Recupération de la page en cours pour la pagination
-    var currentPage = req.query.page;
-
+    var currentPage = parseInt(req.query.page); // Le parseInt permet de convertir en entier une string, utile pour le calcul de la page suivante et précedente 
+    var type = req.query.type;// Récupération du type d'annonce, OFFRES ou DEMANDES
+    
     //Partie avec la pagination
     Ads.count({}, function (err, count) { // Count permet de récupérer le nombre total d'annonce
         if (!err) {
             // Calcul du nombre de page
             nbrPages = Math.ceil(count/limit);
-            Ads.find({}, function(err, ads) {
-                if (!err) {
-                    res.render("offre", {
-                        ads,
-                        nbrPages,
-                        currentPage
-                    });
-                }    
-            }).skip(currentPage * limit - limit).limit(limit); // Afichage de la page en cours avec le bon nombre d'annonce
+            if(!req.query.type && !req.query.selection){
+                Ads.find({}, function(err, ads) {
+                    if (!err) {
+                        res.render("home", {
+                            ads,
+                            nbrPages,
+                            currentPage,
+                            type
+                        });
+                    }    
+                }).skip(currentPage * limit - limit).limit(limit); // Afichage de la page en cours avec le bon nombre d'annonce
+            //console.log("pas de type")
+            }
+            else if (req.query.type){
+                //console.log("il y a un type")
+                //var type = req.query.type;
+                console.log(type)
+                Ads.count({type : type}, function (err, count) { // Count permet de récupérer le nombre total d'annonce
+                    if (!err) {
+                        // Calcul du nombre de page
+                        nbrPages = Math.ceil(count/limit);
+                        Ads.find({type : type}, function(err, ads) {
+                            if (!err) {
+                                res.render("home", {
+                                ads,
+                                nbrPages,
+                                currentPage,
+                                type
+                                });
+                            }    
+                        }).skip(currentPage * limit - limit).limit(limit); // Afichage de la page en cours avec le bon nombre d'annonce    
+                    }
+                });
+            }
         }
-      });
-})
-
-// Filtres des annonces
-app.get('/offres/', function(req, res){
-
-    Ads.find({ type: "offres" }, function (err, ads) {
-        if (!err) {
-            res.render("offre", {
-                ads,
-            });
-        }    
-    })
-
-    // Partie avec pagination
-    // Ads.count({}, function (err, count) {
-    //     if (!err) {
-    //         var nbrPages = Math.ceil(count/limit);
-    //         Ads.find({ type: "offres" }).find(function (err, ads) {
-    //             if (!err) {
-    //                 res.render("offre", {
-    //                     ads,
-    //                     nbrPages,
-    //                     count
-    //                 });
-    //             }    
-    //         }).skip(nbrPages * limit - limit).limit(limit);
-    //     }
-    // });
-});
-
-app.get('/demandes/', function(req, res){
-
-    Ads.find({ type: "demandes" }, function (err, ads) {
-        if (!err) {
-            res.render("offre", {
-                ads,
-            });
-        }    
-    })
-
-
-    // Partie avec la pagination
-    // Ads.count({}, function (err, count) {
-    //     if (!err) {
-    //         nbrPages = Math.ceil(count/limit);
-    //         Ads.find({type: "demandes"}, function(err, ads) {
-    //             if (!err) {
-    //                 res.render("offre", {
-    //                     ads,
-    //                     nbrPages,
-    //                     count
-    //                 });
-    //             }    
-    //         }).skip(nbrPages * limit - limit).limit(limit);
-    //     }
-    //   });
+    });
 })
 
 app.get('/particuliers/', function(req, res){
     Ads.find({ selection: "particuliers" }, function(err, ads) {
             if (!err) {
-                res.render("offre", {
+                res.render("home", {
                     ads,
                 });
             }    
@@ -161,7 +112,7 @@ app.get('/particuliers/', function(req, res){
     //         nbrPages = Math.ceil(count/limit);
     //         Ads.find({ selection: "particuliers" }, function(err, ads) {
     //             if (!err) {
-    //                 res.render("offre", {
+    //                 res.render("home", {
     //                     ads,
     //                     nbrPages,
     //                     count
@@ -175,7 +126,7 @@ app.get('/particuliers/', function(req, res){
 app.get('/professionels/', function(req, res){
     Ads.find({ selection: "professionels" }, function(err, ads) {
         if (!err) {
-            res.render("offre", {
+            res.render("home", {
                 ads,
             });
         }    
@@ -185,7 +136,7 @@ app.get('/professionels/', function(req, res){
     //         nbrPages = Math.ceil(count/limit);
     //         Ads.find({ selection: "professionels" }, function(err, ads) {
     //             if (!err) {
-    //                 res.render("offre", {
+    //                 res.render("home", {
     //                     ads,
     //                     nbrPages,
     //                     count
@@ -208,7 +159,7 @@ app.get('/modify/:id', function(req, res){
 }); 
 
 // Mise à jour de la fiche modifié
-app.post('/modify/:id', upload.single('photo'), function(req,res){
+app.post('/modify/:id', upload.fields('photo', 3), function(req,res){
     var selection = req.body.selection;
     var type = req.body.type;
     var title = req.body.title;
@@ -218,12 +169,12 @@ app.post('/modify/:id', upload.single('photo'), function(req,res){
     var pseudo = req.body.pseudo;
     var email = req.body.email;
     var phone = req.body.phone;
-    var photo = req.file.filename;
+    var photo = req.files.filename;
     var id = req.params.id;
     //var user_id = ads.user_id;
- 
-//console.log("console log dans la modif"+ads.user_id)
 
+    console.log(photo); 
+ 
     Ads.findById(id, function(err, ads){
         var updateAd = {
             selection : selection,
@@ -250,7 +201,6 @@ app.post('/modify/:id', upload.single('photo'), function(req,res){
         
     })
 });
-
 
 // Suppression d'un fiche
 app.post("/remove/:id", function(req, res){
@@ -279,6 +229,7 @@ app.get("/annonce/:id", function(req, res){
     if (req.user) var userid = req.user._id
     
     Ads.findById(id, function (err, ads) {
+        console.log(ads)
         res.render('annonce', {
             ads,
             userid
@@ -287,7 +238,7 @@ app.get("/annonce/:id", function(req, res){
 })
 
 // Récupération des infos entré dans le formulaire
-app.post('/depose', upload.single('photo'), function(req,res){
+app.post('/depose', upload.array('photo', 3), function(req,res){
     // Dans le cas ou il n'est pas enregistré, il crée son compte
             
     var ad = {
@@ -299,13 +250,21 @@ app.post('/depose', upload.single('photo'), function(req,res){
         city: req.body.city,
         pseudo: req.body.pseudo,
         email: req.body.email,
-        phone: req.body.phone,
-        user_id : user._id
+        phone: req.body.phone
+        //user_id : user._id avoir a metre si pas de user
         //user_id : req.user._id
     }
-    if (req.file){
-        ad.photo = req.file.filename;
+    
+
+    if (req.files){
+        var photo =[];
+        var length = req.files; 
+        for(var i=0; i<length.length; i++){
+            photo.push(req.files[i].filename);        
+        }
+        ad.photo = photo;        
     }
+
 
     var newAd = new Ads(ad);
     
@@ -313,7 +272,7 @@ app.post('/depose', upload.single('photo'), function(req,res){
         if (err) {
         console.log("something went wrong");
         } else {
-            console.log("login prob")
+            //console.log(newAd._id)
             res.redirect("/annonce/" + newAd._id);
             }
     });    
@@ -346,7 +305,7 @@ app.get('/myAds/', function(req, res){
 
     Ads.find({ user_id: id }, function(err, ads) {
         if (!err) {
-            res.render("offre", {
+            res.render("home", {
                 ads,
             });
         }    
@@ -358,7 +317,7 @@ app.get('/myAds/', function(req, res){
 //             nbrPages = Math.ceil(count/limit);
 //     Ads.find({ user_id: id }, function(err, ads) {
 //         if (!err) {
-//             res.render("offre", {
+//             res.render("home", {
 //                 ads,
 //                 nbrPages,
 //                 count
@@ -380,7 +339,7 @@ app.get('/myAccount', function(req, res) {
       console.log("hello je suis conecté "+req.user);
       res.render('myAccount');
     } else {
-      res.redirect('/offre');
+      res.redirect('/home');
     }
   });
   
