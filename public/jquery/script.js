@@ -32,8 +32,9 @@ $(document).ready(function(){
         }
     })
 
-    $(".btnConnet").click(function(){
-        //if()
+    $(".btnConnet").mouseenter(function(){
+        alert("hover")
+        $(this).css("background-color","white");
     })
     
 })

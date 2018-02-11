@@ -4,12 +4,29 @@
     
 <div class="container annonce d-flex justify-content-center">
     <div class= "sousContainer">
+        <ul class="d-flex flex-row justify-content-start list-group">
+          <li class="list-group toutes"><a href="?type=<%=type%>" class="d-flex">Toutes</a></li>
+           <li class="list-group "><a href="?selection=particuliers&type=<%=type%>" class="d-flex particuliers">Particuliers</a></li>
+           <li class="list-group "><a href="?selection=professionnels&type=<%=type%>" class="professionnels d-flex">Professionnels</a></li>
+        </ul>
+            <a href="https://www.lereacteur.io/" target="_blank">
+                <div class="row d-flex fiche">
+                    <div class="photo">
+                        <img class="photoImg" src="/uploads/lereacteur.png" %>" alt="photo">
+                    </div>
+                    <div>
+                        <h6 class="title">LeReacteur</h6>
+                        <h6 class="city">Paris</h6>
+                        <h6 class="price">Devenez un Pro du dévelopement Web & mobile</h6>
+                    </div>
+                </div>
+            </a> 
 
     <% for(var i=0; i < ads.length; i++){ %>
         <a href="http://localhost:3000/annonce/<%=ads[i]._id%>">
             <div class="row d-flex fiche">
                 <div class="photo">
-                    <img class="photoImg" src="/uploads/<%= ads[i].photo || "default.png" %>" alt="photo">
+                    <img class="photoImg" src="/uploads/<%= ads[i].photo[0] || "default.png" %>" alt="photo">
                 </div>
                 <div>
                     <h6 class="title"><%=ads[i].title%></h6>

@@ -1,9 +1,10 @@
 <head>
-    <title>Page Title</title> 
+    <title>Leboncoin</title> 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" media="screen" href="/css/main.css" />
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700" rel="stylesheet">
 
+    <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="/jquery/script.js"></script>
@@ -11,25 +12,33 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> 
 </head>
     <header>
+
         <nav class="navbar navbar-light fixed-top">
             <div class="container header">
                 <a class="navbar-brand" href="#">
                     <img src="https://static.leboncoin.fr/img/logo.svg" width="140" height="40" alt="">
                 </a>
-              
                     <a href="/"><span>ACCUEIL</span></a>
                     <a href="/depose"><span>DÉPOSER UNE ANNONCE</span></a>
                     <a href="/?type=offres"><span>OFFRES</span></a>
                     <a href="/?type=demandes"><span>DEMANDES</span></a>
-                    <!-- <a href="/particuliers"><span>PARTICULIERS</span></a>
-                    <a href="/professionels"><span>PROFESSIONELS</span></a> -->
-                    <!-- <a href='/login'><span>Login</span></a>
-                    <a href='/logout'><span>Log Out</span></a>
-                    <a href='/register'><span>Register</span></a> -->
+              
+                    <%if(!isLogin){%>
                     <button class="btnConnect"type="button" data-toggle="modal" data-target="#connectModal">
-                            <span id="userConnet">Se Connecter</span>
+                            <span id="userConnect">Se connecter</span>
                     </button> 
-            
+                    <%} else if(isLogin){%>
+                        <div class="dropdown">
+                            <button class="btnConnect dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span id="userConnect"><%=user.username%></span>
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="#">Mes annonces</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href='/logout'>Se déconnecter</a>
+                            </div>
+                        </div>
+                    <%}%>
             </div>
         </nav> 
     </header>
@@ -64,7 +73,7 @@
                 </div>
                 <div class="modal-footer">
                     <h5 class="modal-title text-center" id="exampleModalLabel">Vous n'avez pas de compte ?</h5>
-                    <button type="button" class="btn btn-primary">Créer un compte</button>
+                    <a href="/register"><button type="button" class="btn btn-primary">Créer un compte</button></a>
                 </div>
               </div>
             </div>

@@ -12,6 +12,8 @@ var LocalStrategy = require('passport-local');
 var User = require('./models/user');
 var Ads = require('./models/ad');
 
+
+
 // Connexion au serveur mongoose
 mongoose.connect("mongodb://localhost:27017/leboncoin");
 
@@ -27,7 +29,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 // Activer la gestion de la session
 app.use(expressSession({
-  secret: 'thereactor09',
+  secret: 'thereactor09', // ajoute une variable afin de complexifié le cryptage du mot de passe.
   resave: false,
   saveUninitialized: false,
   store: new MongoStore({mongooseConnection: mongoose.connection})
@@ -47,47 +49,80 @@ app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: false }));
 
 var limit = 11;
-var nbrPages;  
+var nbrPages;
+var isLogin; 
+var user;
 
 // Page d'accueil
 app.get('/', function(req, res){
+    isLogin = req.isAuthenticated();
+    user = req.user; 
     // Recupération de la page en cours pour la pagination
     var currentPage = parseInt(req.query.page); // Le parseInt permet de convertir en entier une string, utile pour le calcul de la page suivante et précedente 
     var type = req.query.type;// Récupération du type d'annonce, OFFRES ou DEMANDES
+    var selection = req.query.selection;// Récupération de la selection de l'annonce, PARTICULIERS ou PROFESSIONNELS
     
     //Partie avec la pagination
     Ads.count({}, function (err, count) { // Count permet de récupérer le nombre total d'annonce
         if (!err) {
             // Calcul du nombre de page
             nbrPages = Math.ceil(count/limit);
-            if(!req.query.type && !req.query.selection){
-                Ads.find({}, function(err, ads) {
+            if(!type && !selection){
+                type = "offres";
+                Ads.find({type : type}, function(err, ads) {
                     if (!err) {
                         res.render("home", {
                             ads,
                             nbrPages,
                             currentPage,
-                            type
+                            type,
+                            selection,
+                            isLogin,
+                            user
                         });
                     }    
                 }).skip(currentPage * limit - limit).limit(limit); // Afichage de la page en cours avec le bon nombre d'annonce
-            //console.log("pas de type")
             }
-            else if (req.query.type){
-                //console.log("il y a un type")
-                //var type = req.query.type;
-                console.log(type)
-                Ads.count({type : type}, function (err, count) { // Count permet de récupérer le nombre total d'annonce
+            // Dans le cas ou il y a la selection et le type
+            else if (type && selection){
+                Ads.count({type : type, selection : selection }, function (err, count) { // Count permet de récupérer le nombre total d'annonce
                     if (!err) {
                         // Calcul du nombre de page
                         nbrPages = Math.ceil(count/limit);
-                        Ads.find({type : type}, function(err, ads) {
+                        Ads.find({type : type, selection : selection }, function(err, ads) {
                             if (!err) {
+                                console.log("Rechecher des annonces")
                                 res.render("home", {
                                 ads,
                                 nbrPages,
                                 currentPage,
-                                type
+                                type,
+                                selection,
+                                isLogin,
+                                user
+                                });
+                            }    
+                        }).skip(currentPage * limit - limit).limit(limit); // Afichage de la page en cours avec le bon nombre d'annonce    
+                    }
+                });
+            }
+            // Dans le cas ou il n'y a pas de selection on effetue la recherche uniquement avec le type
+            else if(type && !selection){
+                Ads.count({type : type}, function (err, count) { // Count permet de récupérer le nombre total d'annonce
+                    if (!err) {
+                        // Calcul du nombre de page
+                        nbrPages = Math.ceil(count/limit);
+                        Ads.find({type : type,}, function(err, ads) {
+                            if (!err) {
+                                console.log("Rechecher des annonces")
+                                res.render("home", {
+                                ads,
+                                nbrPages,
+                                currentPage,
+                                type,
+                                selection,
+                                isLogin,
+                                user
                                 });
                             }    
                         }).skip(currentPage * limit - limit).limit(limit); // Afichage de la page en cours avec le bon nombre d'annonce    
@@ -98,62 +133,16 @@ app.get('/', function(req, res){
     });
 })
 
-app.get('/particuliers/', function(req, res){
-    Ads.find({ selection: "particuliers" }, function(err, ads) {
-            if (!err) {
-                res.render("home", {
-                    ads,
-                });
-            }    
-        })
-
-    // Ads.count({}, function (err, count) {
-    //     if (!err) {
-    //         nbrPages = Math.ceil(count/limit);
-    //         Ads.find({ selection: "particuliers" }, function(err, ads) {
-    //             if (!err) {
-    //                 res.render("home", {
-    //                     ads,
-    //                     nbrPages,
-    //                     count
-    //                 });
-    //             }    
-    //         }).skip(nbrPages * limit - limit).limit(limit);
-    //     }
-    //   });
-});
-
-app.get('/professionels/', function(req, res){
-    Ads.find({ selection: "professionels" }, function(err, ads) {
-        if (!err) {
-            res.render("home", {
-                ads,
-            });
-        }    
-    })
-    // Ads.count({}, function (err, count) {
-    //     if (!err) {
-    //         nbrPages = Math.ceil(count/limit);
-    //         Ads.find({ selection: "professionels" }, function(err, ads) {
-    //             if (!err) {
-    //                 res.render("home", {
-    //                     ads,
-    //                     nbrPages,
-    //                     count
-    //                 });
-    //             }    
-    //         }).skip(nbrPages * limit - limit).limit(limit);
-    //     }
-    //   });
-})
-
 // Parti modification, recherche de la fiche a modifié dans la DB
 app.get('/modify/:id', function(req, res){
+    user = req.user; 
     var id = req.params.id;
 
     Ads.findById(id, function (err, ads) {
         res.render('modifyAd', {
-      ads
+      ads,
+      isLogin,
+      user
         })
     })
 }); 
@@ -172,6 +161,7 @@ app.post('/modify/:id', upload.fields('photo', 3), function(req,res){
     var photo = req.files.filename;
     var id = req.params.id;
     //var user_id = ads.user_id;
+    user = req.user; 
 
     console.log(photo); 
  
@@ -192,10 +182,10 @@ app.post('/modify/:id', upload.fields('photo', 3), function(req,res){
         if (req.isAuthenticated()) {
             if (ads.user_id == req.user._id){
                 Ads.findByIdAndUpdate(id, updateAd, {new: true}, function (err, updateAd) {
-                        if (err) return console.log(err);
-                        res.redirect("/annonce/" + id);
-                        console.log("Annonce modifié"+ads.user_id);
-                      });
+                    if (err) return console.log(err);
+                    res.redirect("/annonce/" + id);
+                    console.log("Annonce modifié"+ads.user_id);
+                });
             }
         }
         
@@ -224,6 +214,7 @@ app.post("/remove/:id", function(req, res){
 // Affichage d'une annonce unique
 app.get("/annonce/:id", function(req, res){
     var id = req.params.id;
+    user = req.user; 
     //var user_id = req.user_id;
     if (!req.user) var userid = null
     if (req.user) var userid = req.user._id
@@ -232,39 +223,57 @@ app.get("/annonce/:id", function(req, res){
         console.log(ads)
         res.render('annonce', {
             ads,
-            userid
+            userid,
+            isLogin,
+            user
         })  
     })
 })
 
 // Récupération des infos entré dans le formulaire
 app.post('/depose', upload.array('photo', 3), function(req,res){
-    // Dans le cas ou il n'est pas enregistré, il crée son compte
-            
+    isLogin = req.isAuthenticated();
+    // Dans le cas ou il n'est pas enregistré, il crée son compte et depose son annonce
+    
     var ad = {
         selection: req.body.selection,
         type : req.body.type,
         title: req.body.title,
         description: req.body.description,
         price: req.body.price,
-        city: req.body.city,
-        pseudo: req.body.pseudo,
-        email: req.body.email,
-        phone: req.body.phone
-        //user_id : user._id avoir a metre si pas de user
-        //user_id : req.user._id
+        phone : req.body.phone,
+        city: req.body.city
+    }        
+
+    if(!isLogin){
+        //ad.user_id = req.user._id;
+        
+        ad.pseudo = req.body.pseudo;
+        ad.email = req.body.email;
+
+        if (req.files){
+            var photo =[];
+            var length = req.files; 
+            for(var i=0; i<length.length; i++){
+                photo.push(req.files[i].filename);        
+            }
+            ad.photo = photo;        
+        }
+    }
+ 
+    if(isLogin){
+        ad.user_id = req.user._id;
+        console.log(req.user._id);
+        if (req.files){
+            var photo =[];
+            var length = req.files; 
+            for(var i=0; i<length.length; i++){
+                photo.push(req.files[i].filename);        
+            }
+            ad.photo = photo;        
+        }
     }
     
-
-    if (req.files){
-        var photo =[];
-        var length = req.files; 
-        for(var i=0; i<length.length; i++){
-            photo.push(req.files[i].filename);        
-        }
-        ad.photo = photo;        
-    }
-
 
     var newAd = new Ads(ad);
     
@@ -280,13 +289,16 @@ app.post('/depose', upload.array('photo', 3), function(req,res){
 
 // Mise en ligne des infos du formulaire
 app.get('/depose/', function(req, res){
-    var isLogin = req.isAuthenticated();
+    isLogin = req.isAuthenticated();
+    user = req.user; 
+    console.log(isLogin);
     //console.log(requ);
     // S'excute quand je click sur le bouton déposer une annonce et renvoi vers le fichier depose
   
     //console.log("hello")
     res.render('depose', {
-        isLogin
+        isLogin,
+        user
     });
     
     }); 
@@ -294,8 +306,7 @@ app.get('/depose/', function(req, res){
 // Mes annonces
 app.get('/myAds/', function(req, res){
     var id = req.user._id;
-
-    //console.log(req.users)
+    user = req.user;
     
     User.find({}), function(err, user){
         if (!err) {
@@ -307,26 +318,11 @@ app.get('/myAds/', function(req, res){
         if (!err) {
             res.render("home", {
                 ads,
+                isLogin,
+                user
             });
         }    
     });
-
-// Partie avec
-//     Ads.count({}, function (err, count) {
-//         if (!err) {
-//             nbrPages = Math.ceil(count/limit);
-//     Ads.find({ user_id: id }, function(err, ads) {
-//         if (!err) {
-//             res.render("home", {
-//                 ads,
-//                 nbrPages,
-//                 count
-//             });
-//         }    
-//     }).skip(nbrPages * limit - limit).limit(limit);
-
-// }
-// });
     
 }); 
 
@@ -334,26 +330,41 @@ app.get('/myAds/', function(req, res){
 
 app.get('/myAccount', function(req, res) {
     console.log("affichage du user id "+req.user._id)
+    user = req.user; 
 
     if (req.isAuthenticated()) {
       console.log("hello je suis conecté "+req.user);
-      res.render('myAccount');
+      res.render('myAccount',{
+          isLogin,
+          user
+        });
     } else {
       res.redirect('/home');
     }
   });
   
   app.get('/register', function(req, res) {
+    user = req.user; 
     if (req.isAuthenticated()) {
       res.redirect('/myAccount');
     } else {
-      res.render('register');
+      res.render('register', {
+        isLogin,
+        user
+
+      });
     }
   });
   
   app.post('/register', function(req, res) {
     // Créer un utilisateur, en utilisant le model defini
     // Nous aurons besoin de `req.body.username` et `req.body.password`
+    var testpassword = req.body.testpassword;
+    var password = req.body.password;
+    if(password == testpassword){
+        console.log("Mot de passe identique");
+    }
+
     User.register(
       new User({
         username: req.body.username,
@@ -363,10 +374,13 @@ app.get('/myAccount', function(req, res) {
       function(err, user) {
         if (err) {
           console.log(err);
-          return res.render('register');
+          return res.render('register', {
+            isLogin,
+            user
+          });
         } else {
           passport.authenticate('local')(req, res, function() {
-            res.redirect('/myAccount');
+            res.redirect('/');
           });
         }
       }
@@ -375,15 +389,19 @@ app.get('/myAccount', function(req, res) {
   });
   
   app.get('/login', function(req, res) {
+    user = req.user; 
     if (req.isAuthenticated()) {
-      res.redirect('/myAccount');
+      res.redirect('/');
     } else {
-      res.render('login');
+      res.render('login',{
+        isLogin,
+        user
+      });
     }
   });
   
   app.post('/login', passport.authenticate('local', {
-    successRedirect: '/myAccount',
+    successRedirect: '/',
     failureRedirect: '/login'
   }));
   
@@ -393,4 +411,4 @@ app.get('/myAccount', function(req, res) {
   });
   
 
-app.listen(3000, () => console.log('Server is Listing!'));
+app.listen(process.env.PORT || 3000, () => console.log('Server is Listing!'));

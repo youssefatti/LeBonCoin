@@ -12,10 +12,12 @@
 
 .header span{
     display: flex;
-
+    font-weight: 600;
     left: 0px;
     color: white;
     font-size: 13px;
+    line-height: 60px;
+    justify-content: center;
 }
 .container>a{
     text-decoration: none;
@@ -23,6 +25,21 @@
 
 .btnConnect{
     background-color: #D8774A;
+    height: 60px;
+    width: 120px;
+}
+
+.btnConnect:hover{
+    background-color: white;
+    cursor: pointer;
+}
+
+.btnConnect span:hover{
+    color: #D8774A;
+}
+
+.fas{
+    color: white;
 }
 
 /* Formulaire */
@@ -106,6 +123,58 @@
     margin-right: 25px;
 }
 
+.list-group li a{
+    height: 50px;
+    border: 1px solid #CCCCCC;
+    justify-content: center;
+    align-content: center;
+    border-bottom: none;
+    text-align: center;
+}
+
+.list-group a{
+    align-items: center;
+    /* text-decoration-color: #D8774A; */
+    color: black;
+    font-weight: 600;
+}
+
+.list-group li a:first-child{
+    border-right: none;
+    
+}
+
+.toutes a{
+    margin-left: -15px;
+    color: #D8774A;
+    border-bottom: white;
+}
+
+.particuliers{
+    background-color: #E6E6E6;
+}
+
+.list-group li a:last-child{ 
+    width: 220px;
+    border-right: 1px solid #CCCCCC;
+}
+
+.professionnels{
+    /* border-right: 1px solid #CCCCCC; */
+    background-color: #E6E6E6;
+}
+
+.professionnels:hover{
+    background-color: white;
+    /* border-right: 1px solid #CCCCCC; */
+    color: #D8774A;
+}
+
+.particuliers:hover{
+    background-color: white;
+    color: #D8774A;
+}
+
 /*  Annonce */
 
 .photoContainer {
@@ -177,4 +246,9 @@
 
 .photoContainer img:nth-child(2){
     display: none;
+}
+
+.footerConnexion{
+    flex-direction: column;
+    
 }
